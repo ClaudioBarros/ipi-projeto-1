@@ -31,9 +31,27 @@ def dec_int(img):
 			y += 1
 		y = 0
 		x += 1
+		
+	half_image = cv.merge((half_b, half_g, half_r)) 
 
+	final_image = np.zeros((height, width, 3), dtype=np.uint8)
+
+	img_iter = iter(final_image)
+	
+	x, y = 0, 0
+	for row in range(0, (height - 1), 2):
+		for column in range(0, (width - 1), 2):
+			color = half_image[x][y]
+			final_image[row][column] = color 
+			final_image[row][column+1] = color
+			final_image[row+1][column] = color
+			final_image[row+1][column+1] = color
+			y += 1
+		y = 0
+		x += 1
+		
 	#recombinar os canais para formar a imagem final RGB
-	return cv.merge((half_b, half_g, half_r))
+	return final_image 
 
 def edge_improv2(img):
 	
@@ -59,7 +77,7 @@ def edge_improv2(img):
 	r_filtered = cv.subtract(r, img_lapl_uint8)
 	
 	final_image = cv.merge((b_filtered, g_filtered, r_filtered))
-    
+	
 	return final_image
 
 	#mostrar imagem
@@ -69,28 +87,33 @@ def edge_improv2(img):
 def prog1():
 	img = cv.imread('img/test80.jpg')
 
-	half_width = img.shape[1]//2
-	half_height = img.shape[0]//2
+	width = img.shape[1]
+	height = img.shape[0]
 
 	#reduzir e interpolar usando dec_int()
 	img_interpolated =  dec_int(img)	
 	cv.imwrite("output/q1/prog1-dec-int.jpg", img_interpolated)
-	cv.imshow('dec_int()', img_interpolated)
-    
-    #reduzir e interpolar utilizando interpolacao bicubica
-	img_bicubic =  cv.resize(img, [half_width, half_height], cv.INTER_CUBIC)	
+	cv.imwrite("output/q1/prog1-dec-int-comparison.jpg", cv.hconcat([img, img_interpolated]))
+	cv.imshow('dec_int()', cv.hconcat([img, img_interpolated]))
+	
+	#reduzir e interpolar utilizando interpolacao bicubica
+	img_bicubic =  cv.resize(img, [width//2, height//2], cv.INTER_CUBIC)	
+	img_bicubic = cv.resize(img_bicubic, [width, height], cv.INTER_LINEAR)
 	cv.imwrite("output/q1/prog1-bicubic.jpg", img_bicubic)
-	cv.imshow('interpolacao bicubica', img_bicubic)
+	cv.imwrite("output/q1/prog1-bicubic-comparison.jpg", cv.hconcat([img, img_bicubic]))
+	cv.imshow('interpolacao bicubica', cv.hconcat([img, img_bicubic]))
 
 	#utilizar filtro de agucamento em ambas imagens
 	img_interpolated_edge = edge_improv2(img_interpolated)
 	cv.imwrite("output/q1/prog1-dec-int-edge.jpg", img_interpolated_edge)
-	cv.imshow('dec_int() - filtro de agucamento', img_interpolated_edge)
+	cv.imwrite("output/q1/prog1-dec-int-edge-comparison.jpg", cv.hconcat([img, img_interpolated, img_interpolated_edge]))
+	cv.imshow('dec_int() - filtro de agucamento', cv.hconcat([img, img_interpolated, img_interpolated_edge]))
 
 	img_bicubic_edge = edge_improv2(img_bicubic)
 	cv.imwrite("output/q1/prog1-bicubic-edge.jpg", img_bicubic_edge)
-
-	cv.imshow('interpolacao bicubica - filtro de agucamento', img_bicubic_edge)
+	cv.imwrite("output/q1/prog1-bicubic-edge-comparison.jpg", cv.hconcat([img, img_bicubic, img_bicubic_edge]))
+	cv.imwrite("output/q1/prog1-bicubic-edge.jpg", cv.hconcat([img, img_bicubic, img_bicubic_edge]))
+	cv.imshow('interpolacao bicubica - filtro de agucamento', cv.hconcat([img, img_bicubic, img_bicubic_edge]))
 
 	cv.waitKey(0)
 	

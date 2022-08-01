@@ -1,16 +1,14 @@
 import cv2 as cv
-from cv2 import Laplacian
 from cv2 import imread
 import numpy as np
 
 def gamma_correct(img, gamma):
-	## [changing-contrast-brightness-gamma-correction]
+
 	lookUpTable = np.empty((1,256), np.uint8)
 	for i in range(256):
 		lookUpTable[0,i] = np.clip(pow(i / 255.0, gamma) * 255.0, 0, 255)
 
 	res = cv.LUT(img, lookUpTable)
-	## [changing-contrast-brightness-gamma-correction]
 
 	img_gamma_corrected = cv.hconcat([img, res])
 	return img_gamma_corrected
@@ -50,5 +48,4 @@ def main():
 
 	cv.waitKey(0)
 
-	
 main()
